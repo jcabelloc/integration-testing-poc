@@ -11,9 +11,9 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("/application-integration-testing.properties")
 class IntegrationTestingPocApplicationTests {
 
-	@Test
-	void contextLoads() {
-		
-	}
+  @Test
+  void contextLoads() {
+    
+  }
 
 }

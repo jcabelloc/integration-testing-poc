@@ -6,13 +6,12 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import pe.itana.integration.testing.poc.dto.ClienteDto;
 import pe.itana.integration.testing.poc.entity.Cliente;
 import pe.itana.integration.testing.poc.repository.ClienteRepository;
-import pe.itana.integration.testing.poc.utils.ZytrustException;
+import pe.itana.integration.testing.poc.utils.MyException;
 
 
 
@@ -41,12 +40,12 @@ public class ClienteServiceImpl implements ClienteService {
   public Cliente create(Cliente cliente) {
     logger.info("Creando al cliente {}", cliente);
     if (cliente.getCodCliente() != null) {
-      throw new IllegalArgumentException();
+      throw new MyException("Codigo del cliente debe ser nulo");
     }
     
     Cliente cli = new Cliente(cliente.getNroDocumento());
     if (clienteRepository.exists(Example.of(cli))) {
-      throw new DuplicateKeyException("");
+      throw new MyException("Nro. de Documento Duplicado");
     }
 
     cliente = clienteRepository.save(cliente);
@@ -59,7 +58,7 @@ public class ClienteServiceImpl implements ClienteService {
     logger.info("Actualizando al cliente {}", cliente);
 
     if (!clienteRepository.existsById(cliente.getCodCliente())) {
-      throw new ZytrustException("999");
+      throw new MyException("No existe cliente con dicho codigo");
     }
     
     Cliente cli = new Cliente(cliente.getNroDocumento());
@@ -67,7 +66,7 @@ public class ClienteServiceImpl implements ClienteService {
     clienteRepository.findAll(exampleCli)
         .forEach(e -> {
           if (!e.getCodCliente().equals(cliente.getCodCliente())) {
-            throw new DuplicateKeyException("");
+            throw new MyException("El nroDocumento ya esta asignado a otro cliente");
           }
         });
     return clienteRepository.save(cliente);

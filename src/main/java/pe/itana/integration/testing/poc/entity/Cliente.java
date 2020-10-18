@@ -8,6 +8,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,13 +31,17 @@ public class Cliente implements Serializable  {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer codCliente;
   
+  @NotNull(message = "El nombre no puede ser Nulo")
   @Column(nullable = false)
   private String nombre;
   
+  @NotNull(message = "El tipoDocumento no puede ser Nulo")
   @Column
   @Enumerated(EnumType.STRING)
   private TipoDocumento tipoDocumento;
   
+  @NotNull(message = "El nroDocumento no puede ser Nulo")
+  @Size(min = 8, max = 11)
   @Column(unique = true, length = 20)
   private String nroDocumento;
     
