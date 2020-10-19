@@ -36,9 +36,22 @@ public class ClienteController {
   ClienteService clienteService;
   
   @GetMapping
-  public ResponseEntity<List<Cliente>> getClientes() {
+  public ResponseEntity<Response<List<Cliente>>> getClientes() {
+    logger.info("Obteniendo todos los clientes");
+    Response<List<Cliente>> response = new Response<>();
     
-    return new ResponseEntity<>(clienteService.findAll(), HttpStatus.OK);
+    try {
+      List<Cliente> clientes = clienteService.findAll();
+      response.setData(clientes);
+      response.setCodigo(2000);
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    } catch (Exception e) {
+      logger.error(e.toString(), e);
+      response.setCodigo(5000);
+      response.setMensaje("Se presento algun problema");
+      return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
     
   }
   
@@ -136,7 +149,8 @@ public class ClienteController {
   }
   
   @GetMapping(path = "search", params = "nombreStartingWith")
-  public ResponseEntity<Response<List<ClienteDto>>> findByNombreStartingWith(@RequestParam String nombreStartingWith) {
+  public ResponseEntity<Response<List<ClienteDto>>> findByNombreStartingWith(
+      @RequestParam String nombreStartingWith) {
     logger.info("Buscando clientes que inicien nombre con {}", nombreStartingWith);
     Response<List<ClienteDto>> response = new Response<>();  
     try {
