@@ -81,6 +81,8 @@ public class ClienteServiceImpl implements ClienteService {
 
   @Override
   public List<ClienteDto> findByNombreStartingWith(String primerNombre) {
+    logger.info("Obteniendo clientes cuyo nombre inicie con {}", primerNombre);
+
     return clienteRepository.findByNombreStartingWith(primerNombre);
   }
   

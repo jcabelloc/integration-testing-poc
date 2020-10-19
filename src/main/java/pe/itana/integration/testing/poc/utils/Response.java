@@ -21,9 +21,6 @@ public class Response<T> {
     this.mensaje = mensaje;
   }
   
-  
-
-  
   public T getData() {
     return data;
   }

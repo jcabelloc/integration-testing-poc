@@ -55,6 +55,7 @@ docker run --name oracledb \
     oracle/database:18.4.0-xe
 
 ```
+* OJO: Que levante la BD toma alrededor de 3 minutos
 
 * Conectarse al container de la BD oracle
 ```

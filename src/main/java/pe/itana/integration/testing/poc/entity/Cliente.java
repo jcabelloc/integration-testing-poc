@@ -32,6 +32,7 @@ public class Cliente implements Serializable  {
   private Integer codCliente;
   
   @NotNull(message = "El nombre no puede ser Nulo")
+  @Size(min = 2, message = "El nombre debe tener al menos dos caracteres")
   @Column(nullable = false)
   private String nombre;
   
@@ -41,7 +42,7 @@ public class Cliente implements Serializable  {
   private TipoDocumento tipoDocumento;
   
   @NotNull(message = "El nroDocumento no puede ser Nulo")
-  @Size(min = 8, max = 11)
+  @Size(min = 8, max = 11, message = "El nroDocumento debe tener entre 8 y 11 digitos")
   @Column(unique = true, length = 20)
   private String nroDocumento;
     
