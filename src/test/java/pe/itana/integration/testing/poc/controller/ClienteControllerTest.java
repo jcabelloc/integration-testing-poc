@@ -2,8 +2,10 @@ package pe.itana.integration.testing.poc.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,8 +20,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -164,11 +168,40 @@ class ClienteControllerTest {
   //------------ findById---------------------------------------
   @ParameterizedTest
   @CsvFileSource(resources = "/clientes_id_json_respuesta.csv", numLinesToSkip = 1, delimiter = ';')
-  void findById(Integer id, String expected) throws JSONException {
-    
+  void findById_Should_RetornarJsonResponse(Integer id, String expected) throws JSONException {
+    // test case
     String response = restTemplate.getForObject(url + "/" + id, String.class);
     
+    // validation
     JSONAssert.assertEquals(expected, response, JSONCompareMode.STRICT);
+    
+  }
+  //------------ update---------------------------------------
+  
+  @ParameterizedTest
+  @CsvFileSource(resources = "/clientes_data_invalida.csv", numLinesToSkip = 1)
+  void update_Should_BadRequestAndMensajeDataInvalida_When_DataInvalida(String nombre, 
+      String tipoDocumento, String nroDocumento) {
+    // test case
+    int codCliente = new Random().nextInt(1004 - 1001) + 1001;
+    Cliente cliente = restTemplate.exchange(url + "/" + codCliente, HttpMethod.GET, null, 
+        new ParameterizedTypeReference<Response<Cliente>>() {}).getBody().getData();
+    assertNotNull(cliente);
+    cliente.setNombre(nombre);
+    cliente.setNroDocumento(nroDocumento);
+    try {
+      cliente.setTipoDocumento(TipoDocumento.valueOf(tipoDocumento));
+    } catch (IllegalArgumentException e) {
+      cliente.setTipoDocumento(null);
+    }    
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    ResponseEntity<Response<Cliente>> response = restTemplate.exchange(url + "/" + codCliente, 
+        HttpMethod.PUT, request, new ParameterizedTypeReference<Response<Cliente>>() {});
+    
+    // validation
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(Message.DATA_INVALIDA.getCodigo(), response.getBody().getCodigo());
+    assertEquals(Message.DATA_INVALIDA.getTexto(), response.getBody().getMensaje());
     
   }
 
