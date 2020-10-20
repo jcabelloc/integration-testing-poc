@@ -50,6 +50,8 @@ public class Cliente implements Serializable  {
     this.nroDocumento = nroDocumento;
   }
   
+  
+  
   public enum TipoDocumento {
     DNI, RUC
   }
@@ -57,6 +59,12 @@ public class Cliente implements Serializable  {
   public Cliente withCodCliente(Integer codCliente) {
     setCodCliente(codCliente);
     return this;
+  }
+
+  public Cliente(String nombre, TipoDocumento tipoDocumento, String nroDocumento) {
+    this.nombre = nombre;
+    this.tipoDocumento = tipoDocumento;
+    this.nroDocumento = nroDocumento;
   }
 
 }

@@ -1,0 +1,2 @@
+id; jsonRespuesta
+1001; {"codigo":2000,"mensaje":"Ok","errores":null,"data":{"codCliente":1001,"nombre":"ABC TRANSPORTES","tipoDocumento":"RUC","nroDocumento":"20257758214"}}

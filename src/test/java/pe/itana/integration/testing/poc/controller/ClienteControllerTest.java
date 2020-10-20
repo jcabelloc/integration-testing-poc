@@ -5,18 +5,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import pe.itana.integration.testing.poc.entity.Cliente;
+import pe.itana.integration.testing.poc.entity.Cliente.TipoDocumento;
+import pe.itana.integration.testing.poc.utils.Message;
 import pe.itana.integration.testing.poc.utils.Response;
 
 
@@ -32,6 +41,8 @@ class ClienteControllerTest {
   
   @Autowired
   private ClienteController clienteController;
+  
+  HttpHeaders headers = new HttpHeaders();
   
   String url;
   
@@ -69,6 +80,97 @@ class ClienteControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
   
+  //------------ create---------------------------------------
+  @Test
+  void create_Should_RetornarBadRequest_When_DataEsInvalida() {
+    // test case
+    Cliente cliente = new Cliente();
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    ResponseEntity<?> response = restTemplate.postForEntity(url, request, Response.class);
+    
+    // validation
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
   
+  @Test
+  void create_Should_RetornarBadRequest_When_NroDocEsInvalido() {
+    // test case
+    String nroDocInvalido = "1234567";
+    Cliente cliente = new Cliente("Juan Perez", TipoDocumento.DNI, nroDocInvalido);
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    ResponseEntity<?> response = restTemplate.postForEntity(url, request, Response.class);
+    
+    // validation
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+  
+  @Test
+  void create_Should_RetornarBadRequestAndMensajeDataInvalida_When_NroDocEsDuplicado() {
+    // test case
+    String nroDocDuplicado = "20257758214";
+    Cliente cliente = new Cliente("Juan Perez", TipoDocumento.RUC, nroDocDuplicado);
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    ResponseEntity<Response> response = restTemplate.postForEntity(url, request, Response.class);
+    
+    // validation
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals(Message.DATA_INVALIDA.getCodigo(), response.getBody().getCodigo());
+    assertEquals(Message.DATA_INVALIDA.getTexto(), response.getBody().getMensaje());
+  }
+  
+  @ParameterizedTest
+  @CsvFileSource(resources = "/clientes_data_invalida.csv", numLinesToSkip = 1)
+  void create_Should_RetornarBadRequest_When_ClienteConDataInvalida(String nombre, 
+      String tipoDocumento, String nroDocumento) {
+    // test case
+    Cliente cliente = new Cliente();
+    cliente.setNombre(nombre);
+    cliente.setNroDocumento(nroDocumento);
+    try {
+      cliente.setTipoDocumento(TipoDocumento.valueOf(tipoDocumento));
+    } catch (IllegalArgumentException e) {
+      cliente.setTipoDocumento(null);
+    }
+    
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    ResponseEntity<?> response = restTemplate.postForEntity(url, request, Response.class);
+    
+    // validation
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+  
+  @ParameterizedTest
+  @CsvFileSource(resources = "/clientes_data_invalida.csv", numLinesToSkip = 1)
+  void create_Should_RetornarMensajeDataInvalida_When_ClienteConDataInvalida(String nombre, 
+      String tipoDocumento, String nroDocumento) {
+    // test case
+    Cliente cliente = new Cliente();
+    cliente.setNombre(nombre);
+    cliente.setNroDocumento(nroDocumento);
+    try {
+      cliente.setTipoDocumento(TipoDocumento.valueOf(tipoDocumento));
+    } catch (IllegalArgumentException e) {
+      cliente.setTipoDocumento(null);
+    }
+    
+    HttpEntity<Cliente> request = new HttpEntity<>(cliente, headers);
+    Response<List<Cliente>> response = restTemplate.postForObject(url, request, Response.class);
+    
+    // validation
+    assertEquals(Message.DATA_INVALIDA.getCodigo(), response.getCodigo());
+    assertEquals(Message.DATA_INVALIDA.getTexto(), response.getMensaje());
+  }
+  
+  //------------ findById---------------------------------------
+  @ParameterizedTest
+  @CsvFileSource(resources = "/clientes_id_json_respuesta.csv", numLinesToSkip = 1, delimiter = ';')
+  void findById(Integer id, String expected) throws JSONException {
+    
+    String response = restTemplate.getForObject(url + "/" + id, String.class);
+    
+    JSONAssert.assertEquals(expected, response, JSONCompareMode.STRICT);
+    
+  }
+
 
 }
