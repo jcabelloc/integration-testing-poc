@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 import java.util.Random;
-
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,16 +30,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
+
+import pe.itana.integration.testing.poc.AbstractContainerBaseTest;
 import pe.itana.integration.testing.poc.entity.Cliente;
 import pe.itana.integration.testing.poc.entity.Cliente.TipoDocumento;
 import pe.itana.integration.testing.poc.utils.Message;
 import pe.itana.integration.testing.poc.utils.Response;
 
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource("/application-integration-testing.properties")
+//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+//@TestPropertySource("/application-integration-testing.properties")
 @TestMethodOrder(OrderAnnotation.class)
-class ClienteControllerTest {
+class ClienteControllerTest extends AbstractContainerBaseTest {
   
   @LocalServerPort
   private int port;
