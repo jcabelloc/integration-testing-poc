@@ -1,0 +1,2 @@
+codCliente; input; output
+1001; {"codCliente":1001,"nombre":"ABC TRANSPORTES DEL NORTE","tipoDocumento":"RUC","nroDocumento":"20257758214"}; {"codigo":2000,"mensaje":"Ok","errores":null,"data":{"codCliente":1001,"nombre":"ABC TRANSPORTES DEL NORTE","tipoDocumento":"RUC","nroDocumento":"20257758214"}}

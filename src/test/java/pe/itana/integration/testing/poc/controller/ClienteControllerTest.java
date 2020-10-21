@@ -10,7 +10,10 @@ import java.util.Random;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -25,6 +28,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import pe.itana.integration.testing.poc.entity.Cliente;
@@ -35,6 +39,7 @@ import pe.itana.integration.testing.poc.utils.Response;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-integration-testing.properties")
+@TestMethodOrder(OrderAnnotation.class)
 class ClienteControllerTest {
   
   @LocalServerPort
@@ -166,6 +171,7 @@ class ClienteControllerTest {
   }
   
   //------------ findById---------------------------------------
+  @Order(1) 
   @ParameterizedTest
   @CsvFileSource(resources = "/clientes_id_json_respuesta.csv", numLinesToSkip = 1, delimiter = ';')
   void findById_Should_RetornarJsonResponse(Integer id, String expected) throws JSONException {
@@ -180,7 +186,7 @@ class ClienteControllerTest {
   
   @ParameterizedTest
   @CsvFileSource(resources = "/clientes_data_invalida.csv", numLinesToSkip = 1)
-  void update_Should_BadRequestAndMensajeDataInvalida_When_DataInvalida(String nombre, 
+  void update_Should_RetornarBadRequestAndMensajeDataInvalida_When_DataInvalida(String nombre, 
       String tipoDocumento, String nroDocumento) {
     // test case
     int codCliente = new Random().nextInt(1004 - 1001) + 1001;
@@ -202,6 +208,23 @@ class ClienteControllerTest {
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertEquals(Message.DATA_INVALIDA.getCodigo(), response.getBody().getCodigo());
     assertEquals(Message.DATA_INVALIDA.getTexto(), response.getBody().getMensaje());
+    
+  }
+  
+  @ParameterizedTest
+  @Order(2) 
+  @CsvFileSource(resources = "/clientes_update_input_output.csv", numLinesToSkip = 1, 
+      delimiter = ';')  
+  void update_Should_RetornarResponseDeCliente_When_DataEsValida(Integer codCliente, 
+      String clienteJson, String expectedOutput) throws JSONException {
+    // test case
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(clienteJson, headers);
+    ResponseEntity<String> response = restTemplate.exchange(url + "/" + codCliente, 
+        HttpMethod.PUT, request, String.class);
+    
+    JSONAssert.assertEquals(expectedOutput, response.getBody(), JSONCompareMode.STRICT);
+    
     
   }
 
