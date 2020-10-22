@@ -1,2 +1,3 @@
 id; jsonRespuesta
-1001; {"codigo":2000,"mensaje":"Ok","errores":null,"data":{"codCliente":1001,"nombre":"ABC TRANSPORTES","tipoDocumento":"RUC","nroDocumento":"20257758214"}}
+1004; {"codigo":2000,"mensaje":"Ok","errores":null,"data":{"codCliente":1004,"nombre":"CAJA CUZCO","tipoDocumento":"RUC","nroDocumento":"20557758200"}}
+1005; {"codigo":2000,"mensaje":"Ok","errores":null,"data":{"codCliente":1005,"nombre":"COOPERATIVA EL LEON","tipoDocumento":"RUC","nroDocumento":"20556658666"}}

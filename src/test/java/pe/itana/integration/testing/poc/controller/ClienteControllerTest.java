@@ -18,8 +18,6 @@ import org.junit.jupiter.params.provider.CsvFileSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,8 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
-
+import org.springframework.test.context.jdbc.Sql;
 import pe.itana.integration.testing.poc.AbstractContainerBaseTest;
 import pe.itana.integration.testing.poc.entity.Cliente;
 import pe.itana.integration.testing.poc.entity.Cliente.TipoDocumento;
@@ -38,8 +35,7 @@ import pe.itana.integration.testing.poc.utils.Message;
 import pe.itana.integration.testing.poc.utils.Response;
 
 
-//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-//@TestPropertySource("/application-integration-testing.properties")
+
 @TestMethodOrder(OrderAnnotation.class)
 class ClienteControllerTest extends AbstractContainerBaseTest {
   
@@ -58,6 +54,7 @@ class ClienteControllerTest extends AbstractContainerBaseTest {
   
   @BeforeAll
   static void setupBeforeAll() {
+    
   }
   
   @BeforeEach
@@ -71,14 +68,38 @@ class ClienteControllerTest extends AbstractContainerBaseTest {
   }
     
   
-  // ------------ findAll---------------------------------------
+  
   @Test
+  @Sql("/testdata/insert_clientes.sql")
+  @Order(0)
+  void iniciarDataPrueba() {
+    
+  }
+  //------------ findById---------------------------------------
+  
+  @ParameterizedTest
+  @Order(1) 
+  @CsvFileSource(resources = "/clientes_id_json_respuesta.csv", numLinesToSkip = 1, delimiter = ';')
+  void findById_Should_RetornarJsonResponse(Integer id, String expected) throws JSONException {
+    // test case
+    String response = restTemplate.getForObject(url + "/" + id, String.class);
+    
+    // validation
+    JSONAssert.assertEquals(expected, response, JSONCompareMode.STRICT);
+    
+  }
+  
+  // ------------ findAll---------------------------------------
+  
+  @Test
+  @Order(1)
   void findAll_Should_ObtenerClientes() {
     // test case
+    int nroRegistrosDataPrueba = 5;
     Response<List<Cliente>> response = restTemplate.getForObject(url, Response.class);
     
     // Validation
-    assertThat(response.getData()).hasSize(3);
+    assertThat(response.getData()).hasSize(nroRegistrosDataPrueba);
   }
   
   @Test
@@ -171,18 +192,7 @@ class ClienteControllerTest extends AbstractContainerBaseTest {
     assertEquals(Message.DATA_INVALIDA.getTexto(), response.getMensaje());
   }
   
-  //------------ findById---------------------------------------
-  @Order(1) 
-  @ParameterizedTest
-  @CsvFileSource(resources = "/clientes_id_json_respuesta.csv", numLinesToSkip = 1, delimiter = ';')
-  void findById_Should_RetornarJsonResponse(Integer id, String expected) throws JSONException {
-    // test case
-    String response = restTemplate.getForObject(url + "/" + id, String.class);
-    
-    // validation
-    JSONAssert.assertEquals(expected, response, JSONCompareMode.STRICT);
-    
-  }
+
   //------------ update---------------------------------------
   
   @ParameterizedTest
@@ -213,7 +223,6 @@ class ClienteControllerTest extends AbstractContainerBaseTest {
   }
   
   @ParameterizedTest
-  @Order(2) 
   @CsvFileSource(resources = "/clientes_update_input_output.csv", numLinesToSkip = 1, 
       delimiter = ';')  
   void update_Should_RetornarResponseDeCliente_When_DataEsValida(Integer codCliente, 
