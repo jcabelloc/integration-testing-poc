@@ -3,12 +3,6 @@
 ### Creacion del proyecto con Sprint Boot Starter
 
 
-### DB
-```
-docker run -it -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secreto -e MYSQL_DATABASE=app -e MYSQL_USER=app -e MYSQL_PASSWORD=secreto --name app mysql:5.7.27
-
-```
-
 ### Oracle DB
 Referencias:
 * https://github.com/oracle/docker-images/tree/master/OracleDatabase/SingleInstance
@@ -87,4 +81,42 @@ select "description", "version", "script", "installed_on", "success" from "flywa
 drop table "flyway_schema_history";
 ```
 
+## Uso de Testcontainers
+* Referencia: https://www.testcontainers.org/
+
+### Para correr testcontainers desde el IDE, agregar la variable de entorno al ide
+```
+PATH = $PATH:/usr/local/bin
+```
+
+### Nota sobre Testcontainers
+```
+Adding this Testcontainers library JAR will not automatically add a database driver JAR to your project. 
+You should ensure that your project also has a suitable database driver as a dependency.
+```
+
+### Example of creating an image with pre-built DB
+
+* https://github.com/oracle/docker-images/blob/master/OracleDatabase/SingleInstance/samples/prebuiltdb/README.md
+```
+
+docker run --name oracledb -p 1521:1521 -p 5500:5500 oracle/database:18.4.0-xe
+
+docker exec oracledb ./setPassword.sh secreto
+
+docker stop -t 120 oracledb
+
+docker commit -m "Image with prebuilt database" oracledb jcabelloc/oracledb-prebuilt:18.4.0-xe
+
+docker rm oracledb
+
+
+
+```
+
+* Probar la imagen creada (opcional)
+```
+docker run --name oracledb -p 1521:1521 -p 5500:5500  jcabelloc/oracledb-prebuilt:18.4.0-xe
+
+```
 
